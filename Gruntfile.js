@@ -109,6 +109,17 @@ module.exports = function(grunt) {
       }
     },
 
+    sitemap: {
+      dist: {
+        //extension: {
+        //  required: false
+        //},
+        homepage: 'http://gruntjs.com/',
+        pattern: ['build/**/*.html'],
+        siteRoot: './build'
+      }
+    },
+
     open: {
       dev: {
         path: 'http://localhost:5678/'
@@ -144,7 +155,8 @@ module.exports = function(grunt) {
     'docs',
     'blog',
     'plugins',
-    'uglify'
+    'uglify',
+    'sitemap'
   ]);
   grunt.registerTask('default', 'Build the site, download plugins, production ready', [
     'build',
