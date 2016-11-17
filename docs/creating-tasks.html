@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Creating tasks - Grunt: The JavaScript Task Runner</title><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700"><link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon"><link href="/rss" rel="alternate" title="Grunt Blog Feed" type="application/atom+xml"></head><body class="page-docs page-secondary"><div class="navbar navbar-inverse"><div class="navbar-inner"><div class="container"><a class="brand" href="/"><span class="logo"></span></a><div class="nav-collapse collapse"><ul class="nav"><li><a href="/getting-started"><i class="icon-arrow-right"></i><span>Getting Started</span></a></li><li><a href="/configuring-tasks"><i class="icon-cog"></i><span>Configuring Tasks</span></a></li><li><a href="/plugins"><i class="icon-power-cord"></i><span>Plugins</span></a></li><li><a href="/getting-started"><i class="icon-file-text"></i><span>Documentation</span></a></li></ul><form class="navbar-search pull-right"><input class="search-query" type="text" placeholder="Search"></form></div><!--.nav-collapse--></div></div></div><div class="content"><div class="container creating-tasks"><div class="row-fluid"><div class="span9 page"><div class="hero-unit"><h1>Creating tasks</h1><p>Tasks are grunt&#39;s bread and butter. The stuff you do most often, like <code>jshint</code> or <code>nodeunit</code>. Every time Grunt is run, you specify one or more tasks to run, which tells Grunt what you&#39;d like it to do.</p>
+<p>If you don&#39;t specify a task, but a task named &quot;default&quot; has been defined, that task will run (unsurprisingly) by default.</p>
+<h2><a class="anchor" href="#alias-tasks" id="alias-tasks"></a>Alias Tasks</h2>
+<p>If a task list is specified, the new task will be an alias for one or more other tasks. Whenever this &quot;alias task&quot; is run, every specified tasks in <code>taskList</code> will be run, in the order specified. The <code>taskList</code> argument must be an array of tasks.</p>
+<pre><code class="lang-js">grunt.registerTask(taskName, [description, ] taskList)</code></pre>
+<p>This example alias task defines a &quot;default&quot; task whereby the &quot;jshint&quot;, &quot;qunit&quot;, &quot;concat&quot; and &quot;uglify&quot; tasks are run automatically if Grunt is executed without specifying any tasks:</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'default'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'qunit'</span>, <span class="hljs-string">'concat'</span>, <span class="hljs-string">'uglify'</span>]);</code></pre>
+<p>Task arguments can be specified as well. In this example, the alias &quot;dist&quot; runs both the &quot;concat&quot; and &quot;uglify&quot; tasks, each with a &quot;dist&quot; argument:</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'dist'</span>, [<span class="hljs-string">'concat:dist'</span>, <span class="hljs-string">'uglify:dist'</span>]);</code></pre>
+<h2><a class="anchor" href="#multi-tasks" id="multi-tasks"></a>Multi Tasks</h2>
+<p>When a multi task is run, Grunt looks for a property of the same name in the Grunt configuration. Multi-tasks can have multiple configurations, defined using arbitrarily named &quot;targets.&quot;</p>
+<p>Specifying both a task and target like <code>grunt concat:foo</code> or <code>grunt concat:bar</code> will process just the specified target&#39;s configuration, while running <code>grunt concat</code> will iterate over <em>all</em> targets, processing each in turn. Note that if a task has been renamed with <a href="/grunt.task#grunt.task.renametask">grunt.task.renameTask</a>, Grunt will look for a property with the <em>new</em> task name in the config object.</p>
+<p>Most of the contrib tasks, including the <a href="https://github.com/gruntjs/grunt-contrib-jshint#jshint-task">grunt-contrib-jshint plugin jshint task</a> and <a href="https://github.com/gruntjs/grunt-contrib-concat#concat-task">grunt-contrib-concat plugin concat task</a> are multi tasks.</p>
+<pre><code class="lang-js">grunt.registerMultiTask(taskName, [description, ] taskFunction)</code></pre>
+<p>Given the specified configuration, this example multi task would log <code>foo: 1,2,3</code> if Grunt was run via <code>grunt log:foo</code>, or it would log <code>bar: hello world</code> if Grunt was run via <code>grunt log:bar</code>. If Grunt was run as <code>grunt log</code> however, it would log <code>foo: 1,2,3</code> then <code>bar: hello world</code> then <code>baz: false</code>.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  log: {
+    foo: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+    bar: <span class="hljs-string">'hello world'</span>,
+    baz: <span class="hljs-literal">false</span>
+  }
+});
+
+grunt.registerMultiTask(<span class="hljs-string">'log'</span>, <span class="hljs-string">'Log stuff.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  grunt.log.writeln(<span class="hljs-keyword">this</span>.target + <span class="hljs-string">': '</span> + <span class="hljs-keyword">this</span>.data);
+});</code></pre>
+<h2><a class="anchor" href="#basic-tasks" id="basic-tasks"></a>&quot;Basic&quot; Tasks</h2>
+<p>When a basic task is run, Grunt doesn&#39;t look at the configuration or environment—it just runs the specified task function, passing any specified colon-separated arguments in as function arguments.</p>
+<pre><code class="lang-js">grunt.registerTask(taskName, [description, ] taskFunction)</code></pre>
+<p>This example task logs <code>foo, testing 123</code> if Grunt is run via <code>grunt foo:testing:123</code>. If the task is run without arguments as <code>grunt foo</code> the task logs <code>foo, no args</code>.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'A sample task that logs stuff.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arg1, arg2</span>) </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length === <span class="hljs-number">0</span>) {
+    grunt.log.writeln(<span class="hljs-keyword">this</span>.name + <span class="hljs-string">", no args"</span>);
+  } <span class="hljs-keyword">else</span> {
+    grunt.log.writeln(<span class="hljs-keyword">this</span>.name + <span class="hljs-string">", "</span> + arg1 + <span class="hljs-string">" "</span> + arg2);
+  }
+});</code></pre>
+<h2><a class="anchor" href="#custom-tasks" id="custom-tasks"></a>Custom tasks</h2>
+<p>You can go crazy with tasks. If your tasks don&#39;t follow the &quot;multi task&quot; structure, use a custom task.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'default'</span>, <span class="hljs-string">'My "default" task description.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  grunt.log.writeln(<span class="hljs-string">'Currently running the "default" task.'</span>);
+});</code></pre>
+<p>Inside a task, you can run other tasks.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Enqueue "bar" and "baz" tasks, to run after "foo" finishes, in-order.</span>
+  grunt.task.run(<span class="hljs-string">'bar'</span>, <span class="hljs-string">'baz'</span>);
+  <span class="hljs-comment">// Or:</span>
+  grunt.task.run([<span class="hljs-string">'bar'</span>, <span class="hljs-string">'baz'</span>]);
+});</code></pre>
+<p>Tasks can be asynchronous.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'asyncfoo'</span>, <span class="hljs-string">'My "asyncfoo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Force task into async mode and grab a handle to the "done" function.</span>
+  <span class="hljs-keyword">var</span> done = <span class="hljs-keyword">this</span>.async();
+  <span class="hljs-comment">// Run some sync stuff.</span>
+  grunt.log.writeln(<span class="hljs-string">'Processing task...'</span>);
+  <span class="hljs-comment">// And some async stuff.</span>
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    grunt.log.writeln(<span class="hljs-string">'All done!'</span>);
+    done();
+  }, <span class="hljs-number">1000</span>);
+});</code></pre>
+<p>Tasks can access their own name and arguments.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">a, b</span>) </span>{
+  grunt.log.writeln(<span class="hljs-keyword">this</span>.name, a, b);
+});
+
+<span class="hljs-comment">// Usage:</span>
+<span class="hljs-comment">// grunt foo</span>
+<span class="hljs-comment">//   logs: "foo", undefined, undefined</span>
+<span class="hljs-comment">// grunt foo:bar</span>
+<span class="hljs-comment">//   logs: "foo", "bar", undefined</span>
+<span class="hljs-comment">// grunt foo:bar:baz</span>
+<span class="hljs-comment">//   logs: "foo", "bar", "baz"</span></code></pre>
+<p>Tasks can fail if any errors were logged.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">if</span> (failureOfSomeKind) {
+    grunt.log.error(<span class="hljs-string">'This is an error message.'</span>);
+  }
+
+  <span class="hljs-comment">// Fail by returning false if this task had errors</span>
+  <span class="hljs-keyword">if</span> (ifErrors) { <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>; }
+
+  grunt.log.writeln(<span class="hljs-string">'This is the success message'</span>);
+});</code></pre>
+<p>When tasks fail, all subsequent tasks will be aborted unless <code>--force</code> was specified.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Fail synchronously.</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+});
+
+grunt.registerTask(<span class="hljs-string">'bar'</span>, <span class="hljs-string">'My "bar" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> done = <span class="hljs-keyword">this</span>.async();
+  setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Fail asynchronously.</span>
+    done(<span class="hljs-literal">false</span>);
+  }, <span class="hljs-number">1000</span>);
+});</code></pre>
+<p>Tasks can be dependent on the successful execution of other tasks. Note that <code>grunt.task.requires</code> won&#39;t actually RUN the other task(s). It&#39;ll just check to see that it has run and not failed.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+});
+
+grunt.registerTask(<span class="hljs-string">'bar'</span>, <span class="hljs-string">'My "bar" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Fail task if "foo" task failed or never ran.</span>
+  grunt.task.requires(<span class="hljs-string">'foo'</span>);
+  <span class="hljs-comment">// This code executes if the "foo" task ran successfully.</span>
+  grunt.log.writeln(<span class="hljs-string">'Hello, world.'</span>);
+});
+
+<span class="hljs-comment">// Usage:</span>
+<span class="hljs-comment">// grunt foo bar</span>
+<span class="hljs-comment">//   doesn't log, because foo failed.</span>
+<span class="hljs-comment">//   ***Note: This is an example of space-separated sequential commands,</span>
+<span class="hljs-comment">//   (similar to executing two lines of code: `grunt foo` then `grunt bar`)</span>
+<span class="hljs-comment">// grunt bar</span>
+<span class="hljs-comment">//   doesn't log, because foo never ran.</span></code></pre>
+<p>Tasks can fail if required configuration properties don&#39;t exist.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Fail task if "meta.name" config prop is missing</span>
+  <span class="hljs-comment">// Format 1: String</span>
+  grunt.config.requires(<span class="hljs-string">'meta.name'</span>);
+  <span class="hljs-comment">// or Format 2: Array</span>
+  grunt.config.requires([<span class="hljs-string">'meta'</span>, <span class="hljs-string">'name'</span>]);
+  <span class="hljs-comment">// Log... conditionally.</span>
+  grunt.log.writeln(<span class="hljs-string">'This will only log if meta.name is defined in the config.'</span>);
+});</code></pre>
+<p>Tasks can access configuration properties.</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'My "foo" task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-comment">// Log the property value. Returns null if the property is undefined.</span>
+  grunt.log.writeln(<span class="hljs-string">'The meta.name property is: '</span> + grunt.config(<span class="hljs-string">'meta.name'</span>));
+  <span class="hljs-comment">// Also logs the property value. Returns null if the property is undefined.</span>
+  grunt.log.writeln(<span class="hljs-string">'The meta.name property is: '</span> + grunt.config([<span class="hljs-string">'meta'</span>, <span class="hljs-string">'name'</span>]));
+});</code></pre>
+<p>Take a look at the <a href="https://github.com/gruntjs/">contrib tasks</a> for more examples.</p>
+<h2><a class="anchor" href="#cli-options-environment" id="cli-options-environment"></a>CLI options / environment</h2>
+<p>Use <code>process.env</code> to access the <a href="https://en.wikipedia.org/wiki/Environment_variable">environment variables</a>.</p>
+<p>Read more about the available command-line options on the <a href="http://gruntjs.com/using-the-cli">Using the CLI</a> page.</p>
+<h2><a class="anchor" href="#why-doesn-t-my-asynchronous-task-complete" id="why-doesn-t-my-asynchronous-task-complete"></a>Why doesn&#39;t my asynchronous task complete?</h2>
+<p>Chances are this is happening because you have forgotten to call the <a href="http://gruntjs.com/api/inside-tasks#this.async">this.async</a> method to tell Grunt that your task is asynchronous. For simplicity&#39;s sake, Grunt uses a synchronous coding style, which can be switched to asynchronous by calling <code>this.async()</code> within the task body.</p>
+<p>Note that passing <code>false</code> to the <code>done()</code> function tells Grunt that the task has failed.</p>
+<p>For example:</p>
+<pre><code class="lang-js">grunt.registerTask(<span class="hljs-string">'asyncme'</span>, <span class="hljs-string">'My asynchronous task.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">var</span> done = <span class="hljs-keyword">this</span>.async();
+  doSomethingAsync(done);
+});</code></pre>
+<h2><a class="anchor" href="#extra-reference" id="extra-reference"></a>Extra Reference</h2>
+<p>Checkout the <a href="http://gruntjs.com/api">API</a> documentation if you need extra reference to create your tasks.</p>
+<div class="end-link">Found an error in the documentation?
+<a href='https://github.com/gruntjs/grunt-docs/issues'>File an issue</a>.</div></div></div><div class="span3"><div class="well sidebar-nav"><ul class="nav nav-list"><li class="nav-header"><i class="icon-file-text"></i><span>Documentation</span></li><li><a href="/getting-started">Getting Started</a></li><li><a href="/configuring-tasks">Configuring Tasks</a></li><li><a href="/sample-gruntfile">Sample Gruntfile</a></li><li><a class="active" href="/creating-tasks">Creating Tasks</a></li><li><a href="/creating-plugins">Creating Plugins</a></li><li><a href="/using-the-cli">Using the CLI</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Advanced</span></li><li><a href="/api">API</a></li><li><a href="/installing-grunt">Installing Grunt</a></li><li><a href="/frequently-asked-questions">Frequently Asked Questions</a></li><li><a href="/project-scaffolding">Project Scaffolding</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Community</span></li><li><a href="/help-resources">Help Resources</a></li><li><a href="/who-uses-grunt">Who uses Grunt</a></li><li><a href="/built-with-grunt-badge">Built with Grunt Badge</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Migration guides</span></li><li><a href="/upgrading-from-0.3-to-0.4">Upgrading from 0.3 to 0.4</a></li><li><a href="/upgrading-from-0.4-to-1.0">Upgrading from 0.4 to 1.0</a></li></ul><div class="advertisements"><script>var m3_u = (location.protocol=='https:'?'https://revive.bocoup.com/www/delivery/ajs.php':'http://revive.bocoup.com/www/delivery/ajs.php');var m3_r = Math.floor(Math.random()*99999999999);if (!document.MAX_used) document.MAX_used = ',';document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);document.write ("?zoneid=5");document.write ('&amp;cb=' + m3_r);if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));document.write ("&amp;loc=" + escape(window.location));if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));if (document.context) document.write ("&context=" + escape(document.context));if (document.mmm_fo) document.write ("&amp;mmm_fo=1");document.write ("'><\/scr"+"ipt>");</script><noscript><a href='http://revive.bocoup.com/www/delivery/ck.php?n=a656788f&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'><img src='http://revive.bocoup.com/www/delivery/avw.php?zoneid=5&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=a656788f' alt='' /></a></noscript><span class="adsbybocoup">Ads by <a href="http://bocoup.com">Bocoup</a>.</span></div></div></div></div></div></div><footer class="grunt-footer"><div class="inner"><div class="container"><ul class="pull-right"><li><a href="/blog">Blog</a></li><li><a href="/upgrading-from-0.3-to-0.4">Migration Guides</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li><li class="social"><a href="https://github.com/gruntjs/" title="Grunt on GitHub"><span class="icon-github"></span></a></li><li class="social"><a href="https://twitter.com/gruntjs/" title="Grunt on Twitter"><span class="icon-twitter"></span></a></li><li class="social"><a href="/rss" title="Grunt blog RSS feed"><span class="icon-rss"></span></a></li></ul></div></div></footer><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-34623937-1', 'gruntjs.com');
+ga('send', 'pageview');</script></body></html>

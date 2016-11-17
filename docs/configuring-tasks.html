@@ -1,0 +1,341 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Configuring tasks - Grunt: The JavaScript Task Runner</title><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700"><link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon"><link href="/rss" rel="alternate" title="Grunt Blog Feed" type="application/atom+xml"></head><body class="page-docs page-secondary"><div class="navbar navbar-inverse"><div class="navbar-inner"><div class="container"><a class="brand" href="/"><span class="logo"></span></a><div class="nav-collapse collapse"><ul class="nav"><li><a href="/getting-started"><i class="icon-arrow-right"></i><span>Getting Started</span></a></li><li><a href="/configuring-tasks"><i class="icon-cog"></i><span>Configuring Tasks</span></a></li><li><a href="/plugins"><i class="icon-power-cord"></i><span>Plugins</span></a></li><li><a href="/getting-started"><i class="icon-file-text"></i><span>Documentation</span></a></li></ul><form class="navbar-search pull-right"><input class="search-query" type="text" placeholder="Search"></form></div><!--.nav-collapse--></div></div></div><div class="content"><div class="container configuring-tasks"><div class="row-fluid"><div class="span9 page"><div class="hero-unit"><h1>Configuring tasks</h1><p>This guide explains how to configure tasks for your project using a <code>Gruntfile</code>. If you don&#39;t know what a <code>Gruntfile</code> is, please read the <a href="/getting-started/">Getting Started</a> guide and check out a <a href="/sample-gruntfile/">Sample Gruntfile</a>.</p>
+<h2><a class="anchor" href="#grunt-configuration" id="grunt-configuration"></a>Grunt Configuration</h2>
+<p>Task configuration is specified in your <code>Gruntfile</code> via the <code>grunt.initConfig</code> method. This configuration will mostly be under task-named properties, but may contain any arbitrary data. As long as properties don&#39;t conflict with properties your tasks require, they will be otherwise ignored.</p>
+<p>Also, because this is JavaScript, you&#39;re not limited to JSON; you may use any valid JavaScript here. You may even programmatically generate the configuration if necessary.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    <span class="hljs-comment">// concat task configuration goes here.</span>
+  },
+  uglify: {
+    <span class="hljs-comment">// uglify task configuration goes here.</span>
+  },
+  <span class="hljs-comment">// Arbitrary non-task-specific properties.</span>
+  my_property: <span class="hljs-string">'whatever'</span>,
+  my_src_files: [<span class="hljs-string">'foo/*.js'</span>, <span class="hljs-string">'bar/*.js'</span>],
+});</code></pre>
+<h2><a class="anchor" href="#task-configuration-and-targets" id="task-configuration-and-targets"></a>Task Configuration and Targets</h2>
+<p>When a task is run, Grunt looks for its configuration under a property of the same name. Multi-tasks can have multiple configurations, defined using arbitrarily named &quot;targets.&quot; In the example below, the <code>concat</code> task has <code>foo</code> and <code>bar</code> targets, while the <code>uglify</code> task only has a <code>bar</code> target.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    foo: {
+      <span class="hljs-comment">// concat task "foo" target options and files go here.</span>
+    },
+    bar: {
+      <span class="hljs-comment">// concat task "bar" target options and files go here.</span>
+    },
+  },
+  uglify: {
+    bar: {
+      <span class="hljs-comment">// uglify task "bar" target options and files go here.</span>
+    },
+  },
+});</code></pre>
+<p>Specifying both a task and target like <code>grunt concat:foo</code> or <code>grunt concat:bar</code> will process just the specified target&#39;s configuration, while running <code>grunt concat</code> will iterate over <em>all</em> targets, processing each in turn. Note that if a task has been renamed with <a href="/grunt.task#grunt.task.renametask">grunt.task.renameTask</a>, Grunt will look for a property with the <em>new</em> task name in the config object.</p>
+<h2><a class="anchor" href="#options" id="options"></a>Options</h2>
+<p>Inside a task configuration, an <code>options</code> property may be specified to override built-in defaults. In addition, each target may have an <code>options</code> property which is specific to that target. Target-level options will override task-level options.</p>
+<p>The <code>options</code> object is optional and may be omitted if not needed.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    options: {
+      <span class="hljs-comment">// Task-level options may go here, overriding task defaults.</span>
+    },
+    foo: {
+      options: {
+        <span class="hljs-comment">// "foo" target options may go here, overriding task-level options.</span>
+      },
+    },
+    bar: {
+      <span class="hljs-comment">// No options specified; this target will use task-level options.</span>
+    },
+  },
+});</code></pre>
+<h2><a class="anchor" href="#files" id="files"></a>Files</h2>
+<p>Because most tasks perform file operations, Grunt has powerful abstractions for declaring on which files the task should operate. There are several ways to define <strong>src-dest</strong> (source-destination) file mappings, offering varying degrees of verbosity and control. Any multi task will understand all the following formats, so choose whichever format best meets your needs.</p>
+<p>All files formats support <code>src</code> and <code>dest</code> but the <a href="/configuring-tasks#compact-format">Compact</a> and <a href="/configuring-tasks#files-array-format">Files Array</a> formats support a few additional properties:</p>
+<ul>
+<li><code>filter</code> Either a valid <a href="https://nodejs.org/docs/latest/api/fs.html#fs_class_fs_stats">fs.Stats method name</a> or a function that is passed the matched <code>src</code> filepath and returns <code>true</code> or <code>false</code>. <a href="/configuring-tasks#custom-filter-function">See examples</a></li>
+<li><code>nonull</code> If set to <code>true</code> then the operation will include non-matching patterns. Combined with grunt&#39;s <code>--verbose</code> flag, this option can help debug file path issues.</li>
+<li><code>dot</code> Allow patterns to match filenames starting with a period, even if the pattern does not explicitly have a period in that spot.</li>
+<li><code>matchBase</code> If set, patterns without slashes will be matched against the basename of the path if it contains slashes. For example, <code>a?b</code> would match the path <code>/xyz/123/acb</code>, but not <code>/xyz/acb/123</code>.</li>
+<li><code>expand</code> Process a dynamic src-dest file mapping, see <a href="/configuring-tasks#building-the-files-object-dynamically">&quot;Building the files object dynamically&quot;</a> for more information.</li>
+<li>Other properties will be passed into the underlying libs as matching options. See the <a href="https://github.com/isaacs/node-glob">node-glob</a> and <a href="https://github.com/isaacs/minimatch">minimatch</a> documentation for more options.</li>
+</ul>
+<h3><a class="anchor" href="#difference-between-grunt-and-task-options" id="difference-between-grunt-and-task-options"></a>Difference Between Grunt and Task Options</h3>
+<p>Most tasks perform file operations, so Grunt provides a built-in infrastructure to retrieve the files a task should process. The advantage is that this logic doesn&#39;t have to be implemented again by tasks authors. To allow a user to specify these files, Grunt provides options such as <code>nonull</code> and <code>filter</code>.</p>
+<p>In addition to the files to work on, each task has its own specific needs. A task author may want to allow its user to configure some options to override the default behavior. These task-specific options shall not be confused with the Grunt options described before.</p>
+<p>To further clarify this difference, let&#39;s see an example that uses <a href="https://github.com/gruntjs/grunt-contrib-jshint">grunt-contrib-jshint</a>:</p>
+<pre><code class="lang-js">grunt.initConfig({
+  jshint: {
+    ignore_warning: {
+      options: {
+        <span class="hljs-string">'-W015'</span>: <span class="hljs-literal">true</span>,
+      },
+      src: <span class="hljs-string">'js/**'</span>,
+      filter: <span class="hljs-string">'isFile'</span>
+    }
+  }
+});</code></pre>
+<p>This configuration employs the Grunt options <code>src</code> and <code>filter</code> to specify the files to process. It also uses the grunt-contrib-jshint task-specific option <code>-W015</code> to ignore a specific warning (the one having code <code>W015</code>).</p>
+<h3><a class="anchor" href="#compact-format" id="compact-format"></a>Compact Format</h3>
+<p>This form allows a single <strong>src-dest</strong> (source-destination) file mapping per-target. It is most commonly used for read-only tasks, like <a href="https://github.com/gruntjs/grunt-contrib-jshint">grunt-contrib-jshint</a>, where a single <code>src</code> property is needed, and no <code>dest</code> key is relevant. This format also supports additional properties per src-dest file mapping.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  jshint: {
+    foo: {
+      src: [<span class="hljs-string">'src/aa.js'</span>, <span class="hljs-string">'src/aaa.js'</span>]
+    },
+  },
+  concat: {
+    bar: {
+      src: [<span class="hljs-string">'src/bb.js'</span>, <span class="hljs-string">'src/bbb.js'</span>],
+      dest: <span class="hljs-string">'dest/b.js'</span>,
+    },
+  },
+});</code></pre>
+<h3><a class="anchor" href="#files-object-format" id="files-object-format"></a>Files Object Format</h3>
+<p>This form supports multiple src-dest mappings per-target, where the property name is the destination file, and its value is the source file(s). Any number of src-dest file mappings may be specified in this way, but additional properties may not be specified per mapping.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    foo: {
+      files: {
+        <span class="hljs-string">'dest/a.js'</span>: [<span class="hljs-string">'src/aa.js'</span>, <span class="hljs-string">'src/aaa.js'</span>],
+        <span class="hljs-string">'dest/a1.js'</span>: [<span class="hljs-string">'src/aa1.js'</span>, <span class="hljs-string">'src/aaa1.js'</span>],
+      },
+    },
+    bar: {
+      files: {
+        <span class="hljs-string">'dest/b.js'</span>: [<span class="hljs-string">'src/bb.js'</span>, <span class="hljs-string">'src/bbb.js'</span>],
+        <span class="hljs-string">'dest/b1.js'</span>: [<span class="hljs-string">'src/bb1.js'</span>, <span class="hljs-string">'src/bbb1.js'</span>],
+      },
+    },
+  },
+});</code></pre>
+<h3><a class="anchor" href="#files-array-format" id="files-array-format"></a>Files Array Format</h3>
+<p>This form supports multiple src-dest file mappings per-target, while also allowing additional properties per mapping.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    foo: {
+      files: [
+        {src: [<span class="hljs-string">'src/aa.js'</span>, <span class="hljs-string">'src/aaa.js'</span>], dest: <span class="hljs-string">'dest/a.js'</span>},
+        {src: [<span class="hljs-string">'src/aa1.js'</span>, <span class="hljs-string">'src/aaa1.js'</span>], dest: <span class="hljs-string">'dest/a1.js'</span>},
+      ],
+    },
+    bar: {
+      files: [
+        {src: [<span class="hljs-string">'src/bb.js'</span>, <span class="hljs-string">'src/bbb.js'</span>], dest: <span class="hljs-string">'dest/b/'</span>, nonull: <span class="hljs-literal">true</span>},
+        {src: [<span class="hljs-string">'src/bb1.js'</span>, <span class="hljs-string">'src/bbb1.js'</span>], dest: <span class="hljs-string">'dest/b1/'</span>, filter: <span class="hljs-string">'isFile'</span>},
+      ],
+    },
+  },
+});</code></pre>
+<h3><a class="anchor" href="#older-formats" id="older-formats"></a>Older Formats</h3>
+<p>The <strong>dest-as-target</strong> file format is a holdover from before multi tasks and targets existed, where the destination filepath is actually the target name. Unfortunately, because target names are filepaths, running <code>grunt task:target</code> can be awkward. Also, you can&#39;t specify target-level options or additional properties per src-dest file mapping.</p>
+<p>Consider this format deprecated, and avoid it where possible.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    <span class="hljs-string">'dest/a.js'</span>: [<span class="hljs-string">'src/aa.js'</span>, <span class="hljs-string">'src/aaa.js'</span>],
+    <span class="hljs-string">'dest/b.js'</span>: [<span class="hljs-string">'src/bb.js'</span>, <span class="hljs-string">'src/bbb.js'</span>],
+  },
+});</code></pre>
+<h3><a class="anchor" href="#custom-filter-function" id="custom-filter-function"></a>Custom Filter Function</h3>
+<p>The <code>filter</code> property can help you target files with a greater level of detail. Simply use a valid <a href="https://nodejs.org/docs/latest/api/fs.html#fs_class_fs_stats">fs.Stats method name</a>. The following will clean only if the pattern matches an actual file:</p>
+<pre><code class="lang-js">grunt.initConfig({
+  clean: {
+    foo: {
+      src: [<span class="hljs-string">'tmp/**/*'</span>],
+      filter: <span class="hljs-string">'isFile'</span>,
+    },
+  },
+});</code></pre>
+<p>Or create your own <code>filter</code> function and return <code>true</code> or <code>false</code> whether the file should be matched. For example the following will only clean folders that are empty:</p>
+<pre><code class="lang-js">grunt.initConfig({
+  clean: {
+    foo: {
+      src: [<span class="hljs-string">'tmp/**/*'</span>],
+      filter: <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">filepath</span>) </span>{
+        <span class="hljs-keyword">return</span> (grunt.file.isDir(filepath) &amp;&amp; <span class="hljs-built_in">require</span>(<span class="hljs-string">'fs'</span>).readdirSync(filepath).length === <span class="hljs-number">0</span>);
+      },
+    },
+  },
+});</code></pre>
+<p>Another example—which utilizes the <a href="/configuring-tasks#globbing-patterns">globbing</a> and <a href="/configuring-tasks#building-the-files-object-dynamically">expand: true</a> features—allows you to avoid overwriting files which already exist in the destination:</p>
+<pre><code class="lang-js">grunt.initConfig({
+  copy: {
+    templates: {
+      files: [{
+        expand: <span class="hljs-literal">true</span>,
+        cwd: [<span class="hljs-string">'templates/css/'</span>],     <span class="hljs-comment">// Parent folder of original CSS templates</span>
+        src: <span class="hljs-string">'**/*.css'</span>,             <span class="hljs-comment">// Collects all `*.css` files within the parent folder (and its subfolders)</span>
+        dest: <span class="hljs-string">'src/css/'</span>,            <span class="hljs-comment">// Stores the collected `*.css` files in your `src/css/` folder</span>
+        filter: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">dest</span>) </span>{    <span class="hljs-comment">// `dest`, in this instance, is the filepath of each matched `src`</span>
+          <span class="hljs-keyword">var</span> cwd = <span class="hljs-keyword">this</span>.cwd,        <span class="hljs-comment">// Configures variables (these are documented for your convenience only)</span>
+              src = dest.replace(<span class="hljs-keyword">new</span> <span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'^'</span> + cwd), <span class="hljs-string">''</span>);
+              dest = grunt.task.current.data.files[<span class="hljs-number">0</span>].dest;
+          <span class="hljs-keyword">return</span> (!grunt.file.exists(dest + src));    <span class="hljs-comment">// Copies `src` files ONLY if their destinations are unoccupied</span>
+        }
+      }]
+    }
+  }
+});</code></pre>
+<p>Keep in mind the above technique does not account for the <a href="/configuring-tasks#building-the-files-object-dynamically">rename property</a> when checking if the destination exists.</p>
+<h3><a class="anchor" href="#globbing-patterns" id="globbing-patterns"></a>Globbing patterns</h3>
+<p>It is often impractical to specify all source filepaths individually, so Grunt supports filename expansion (also known as globbing) via the built-in <a href="https://github.com/isaacs/node-glob">node-glob</a> and <a href="https://github.com/isaacs/minimatch">minimatch</a> libraries.</p>
+<p>While this isn&#39;t a comprehensive tutorial on globbing patterns, know that in a filepath:</p>
+<ul>
+<li><code>*</code> matches any number of characters, but not <code>/</code></li>
+<li><code>?</code> matches a single character, but not <code>/</code></li>
+<li><code>**</code> matches any number of characters, including <code>/</code>, as long as it&#39;s the only thing in a path part</li>
+<li><code>{}</code> allows for a comma-separated list of &quot;or&quot; expressions</li>
+<li><code>!</code> at the beginning of a pattern will negate the match</li>
+</ul>
+<p>All most people need to know is that <code>foo/*.js</code> will match all files ending with <code>.js</code> in the <code>foo/</code> subdirectory, but <code>foo/**/*.js</code> will match all files ending with <code>.js</code> in the <code>foo/</code> subdirectory <em>and all of its subdirectories</em>.</p>
+<p>Also, in order to simplify otherwise complicated globbing patterns, Grunt allows arrays of file paths or globbing patterns to be specified. Patterns are processed in-order, with <code>!</code>-prefixed matches excluding matched files from the result set. The result set is uniqued.</p>
+<p>For example:</p>
+<pre><code class="lang-js"><span class="hljs-comment">// You can specify single files:</span>
+{src: <span class="hljs-string">'foo/this.js'</span>, dest: ...}
+<span class="hljs-comment">// Or arrays of files:</span>
+{src: [<span class="hljs-string">'foo/this.js'</span>, <span class="hljs-string">'foo/that.js'</span>, <span class="hljs-string">'foo/the-other.js'</span>], dest: ...}
+<span class="hljs-comment">// Or you can generalize with a glob pattern:</span>
+{src: <span class="hljs-string">'foo/th*.js'</span>, dest: ...}
+
+<span class="hljs-comment">// This single node-glob pattern:</span>
+{src: <span class="hljs-string">'foo/{a,b}*.js'</span>, dest: ...}
+<span class="hljs-comment">// Could also be written like this:</span>
+{src: [<span class="hljs-string">'foo/a*.js'</span>, <span class="hljs-string">'foo/b*.js'</span>], dest: ...}
+
+<span class="hljs-comment">// All .js files, in foo/, in alpha order:</span>
+{src: [<span class="hljs-string">'foo/*.js'</span>], dest: ...}
+<span class="hljs-comment">// Here, bar.js is first, followed by the remaining files, in alpha order:</span>
+{src: [<span class="hljs-string">'foo/bar.js'</span>, <span class="hljs-string">'foo/*.js'</span>], dest: ...}
+
+<span class="hljs-comment">// All files except for bar.js, in alpha order:</span>
+{src: [<span class="hljs-string">'foo/*.js'</span>, <span class="hljs-string">'!foo/bar.js'</span>], dest: ...}
+<span class="hljs-comment">// All files in alpha order, but with bar.js at the end.</span>
+{src: [<span class="hljs-string">'foo/*.js'</span>, <span class="hljs-string">'!foo/bar.js'</span>, <span class="hljs-string">'foo/bar.js'</span>], dest: ...}
+
+<span class="hljs-comment">// Templates may be used in filepaths or glob patterns:</span>
+{src: [<span class="hljs-string">'src/&lt;%= basename %&gt;.js'</span>], dest: <span class="hljs-string">'build/&lt;%= basename %&gt;.min.js'</span>}
+<span class="hljs-comment">// But they may also reference file lists defined elsewhere in the config:</span>
+{src: [<span class="hljs-string">'foo/*.js'</span>, <span class="hljs-string">'&lt;%= jshint.all.src %&gt;'</span>], dest: ...}</code></pre>
+<p>For more on glob pattern syntax, see the <a href="https://github.com/isaacs/node-glob">node-glob</a> and <a href="https://github.com/isaacs/minimatch">minimatch</a> documentation.</p>
+<h3><a class="anchor" href="#building-the-files-object-dynamically" id="building-the-files-object-dynamically"></a>Building the files object dynamically</h3>
+<p>When you want to process many individual files, a few additional properties may be used to build a files list dynamically. These properties may be specified in both <a href="/configuring-tasks#compact-format">Compact</a> and <a href="/configuring-tasks#files-array-format">Files Array</a> mapping formats.</p>
+<p><code>expand</code> Set to <code>true</code> will enable the following properties:</p>
+<ul>
+<li><code>cwd</code> All <code>src</code> matches are relative to (but don&#39;t include) this path.</li>
+<li><code>src</code> Pattern(s) to match, relative to the <code>cwd</code>.</li>
+<li><code>dest</code> Destination path prefix.</li>
+<li><code>ext</code> Replace any existing extension with this value in generated <code>dest</code> paths.</li>
+<li><code>extDot</code> Used to indicate where the period indicating the extension is located. Can take either <code>&#39;first&#39;</code> (extension begins after the first period in the file name) or <code>&#39;last&#39;</code> (extension begins after the last period), and is set by default to <code>&#39;first&#39;</code> <em>[Added in 0.4.3]</em></li>
+<li><code>flatten</code> Remove all path parts from generated <code>dest</code> paths.</li>
+<li><code>rename</code> Embeds a customized function, which returns a string containing the new destination and filename. This function is called for each matched <code>src</code> file (after extension renaming and flattening). <a href="/configuring-tasks#the-rename-property">More information</a></li>
+</ul>
+<p>In the following example, the <code>uglify</code> task will see the same list of src-dest file mappings for both the <code>static_mappings</code> and <code>dynamic_mappings</code> targets, because Grunt will automatically expand the <code>dynamic_mappings</code> files object into 4 individual static src-dest file mappings—assuming 4 files are found—when the task runs.</p>
+<p>Any combination of static src-dest and dynamic src-dest file mappings may be specified.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  uglify: {
+    static_mappings: {
+      <span class="hljs-comment">// Because these src-dest file mappings are manually specified, every</span>
+      <span class="hljs-comment">// time a new file is added or removed, the Gruntfile has to be updated.</span>
+      files: [
+        {src: <span class="hljs-string">'lib/a.js'</span>, dest: <span class="hljs-string">'build/a.min.js'</span>},
+        {src: <span class="hljs-string">'lib/b.js'</span>, dest: <span class="hljs-string">'build/b.min.js'</span>},
+        {src: <span class="hljs-string">'lib/subdir/c.js'</span>, dest: <span class="hljs-string">'build/subdir/c.min.js'</span>},
+        {src: <span class="hljs-string">'lib/subdir/d.js'</span>, dest: <span class="hljs-string">'build/subdir/d.min.js'</span>},
+      ],
+    },
+    dynamic_mappings: {
+      <span class="hljs-comment">// Grunt will search for "**/*.js" under "lib/" when the "uglify" task</span>
+      <span class="hljs-comment">// runs and build the appropriate src-dest file mappings then, so you</span>
+      <span class="hljs-comment">// don't need to update the Gruntfile when files are added or removed.</span>
+      files: [
+        {
+          expand: <span class="hljs-literal">true</span>,     <span class="hljs-comment">// Enable dynamic expansion.</span>
+          cwd: <span class="hljs-string">'lib/'</span>,      <span class="hljs-comment">// Src matches are relative to this path.</span>
+          src: [<span class="hljs-string">'**/*.js'</span>], <span class="hljs-comment">// Actual pattern(s) to match.</span>
+          dest: <span class="hljs-string">'build/'</span>,   <span class="hljs-comment">// Destination path prefix.</span>
+          ext: <span class="hljs-string">'.min.js'</span>,   <span class="hljs-comment">// Dest filepaths will have this extension.</span>
+          extDot: <span class="hljs-string">'first'</span>   <span class="hljs-comment">// Extensions in filenames begin after the first dot</span>
+        },
+      ],
+    },
+  },
+});</code></pre>
+<h4><a class="anchor" href="#the-rename-property" id="the-rename-property"></a>The rename Property</h4>
+<p>The <code>rename</code> property is unique, as the only valid value for it is a JavaScript function. Although the function returns a string, you cannot simply use a string as a value for <code>rename</code> (doing so results in an error: <code>Property &#39;rename&#39; of object # is not a function</code>). In the following example, the <code>copy</code> task will create a backup of README.md.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  copy: {
+    backup: {
+      files: [{
+        expand: <span class="hljs-literal">true</span>,
+        src: [<span class="hljs-string">'docs/README.md'</span>],    <span class="hljs-comment">// The README.md file has been specified for backup</span>
+        rename: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{       <span class="hljs-comment">// The value for rename must be a function</span>
+          <span class="hljs-keyword">return</span> <span class="hljs-string">'docs/BACKUP.txt'</span>; <span class="hljs-comment">// The function must return a string with the complete destination</span>
+        }
+      }]
+    }
+  }
+});</code></pre>
+<p>When the function is called, the <code>dest</code> and matched <code>src</code> path are passed in and can be used for returning the output string. In the following example, files are copied from the <code>dev</code> folder to the <code>dist</code> folder, and renamed to have the word &quot;beta&quot; removed .</p>
+<pre><code class="lang-js">grunt.initConfig({
+  copy: {
+    production: {
+      files: [{
+        expand: <span class="hljs-literal">true</span>,
+        cwd: <span class="hljs-string">'dev/'</span>,
+        src: [<span class="hljs-string">'*'</span>],
+        dest: <span class="hljs-string">'dist/'</span>,
+        rename: <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">dest, src</span>) </span>{          <span class="hljs-comment">// The `dest` and `src` values can be passed into the function</span>
+          <span class="hljs-keyword">return</span> dest + src.replace(<span class="hljs-string">'beta'</span>,<span class="hljs-string">''</span>); <span class="hljs-comment">// The `src` is being renamed; the `dest` remains the same</span>
+        }
+      }]
+    }
+  }
+});</code></pre>
+<p>If multiple matched <code>src</code> paths are renamed to an identical destination (i.e. if two different files get renamed to the same file), each output will be added to an array of sources for it.</p>
+<h2><a class="anchor" href="#templates" id="templates"></a>Templates</h2>
+<p>Templates specified using <code>&lt;% %&gt;</code> delimiters will be automatically expanded when tasks read them from the config. Templates are expanded recursively until no more remain.</p>
+<p>The entire config object is the context in which properties are resolved. Additionally, <code>grunt</code> and its methods are available inside templates, eg. <code>&lt;%= grunt.template.today(&#39;yyyy-mm-dd&#39;) %&gt;</code>.</p>
+<ul>
+<li><code>&lt;%= prop.subprop %&gt;</code> Expand to the value of <code>prop.subprop</code> in the config, regardless of type. Templates like this can be used to reference not only string values, but also arrays or other objects.</li>
+<li><code>&lt;% %&gt;</code> Execute arbitrary inline JavaScript code. This is useful with control flow or looping.</li>
+</ul>
+<p>Given the sample <code>concat</code> task configuration below, running <code>grunt concat:sample</code> will generate a file named <code>build/abcde.js</code> by concatenating the banner <code>/* abcde */</code> with all files matching <code>foo/*.js</code> + <code>bar/*.js</code> + <code>baz/*.js</code>.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  concat: {
+    sample: {
+      options: {
+        banner: <span class="hljs-string">'/* &lt;%= baz %&gt; */\n'</span>,   <span class="hljs-comment">// '/* abcde */\n'</span>
+      },
+      src: [<span class="hljs-string">'&lt;%= qux %&gt;'</span>, <span class="hljs-string">'baz/*.js'</span>],  <span class="hljs-comment">// [['foo/*.js', 'bar/*.js'], 'baz/*.js']</span>
+      dest: <span class="hljs-string">'build/&lt;%= baz %&gt;.js'</span>,      <span class="hljs-comment">// 'build/abcde.js'</span>
+    },
+  },
+  <span class="hljs-comment">// Arbitrary properties used in task configuration templates.</span>
+  foo: <span class="hljs-string">'c'</span>,
+  bar: <span class="hljs-string">'b&lt;%= foo %&gt;d'</span>, <span class="hljs-comment">// 'bcd'</span>
+  baz: <span class="hljs-string">'a&lt;%= bar %&gt;e'</span>, <span class="hljs-comment">// 'abcde'</span>
+  qux: [<span class="hljs-string">'foo/*.js'</span>, <span class="hljs-string">'bar/*.js'</span>],
+});</code></pre>
+<h2><a class="anchor" href="#importing-external-data" id="importing-external-data"></a>Importing External Data</h2>
+<p>In the following Gruntfile, project metadata is imported into the Grunt config from a <code>package.json</code> file, and the <a href="https://github.com/gruntjs/grunt-contrib-uglify">grunt-contrib-uglify plugin</a> <code>uglify</code> task is configured to minify a source file and generate a banner comment dynamically using that metadata.</p>
+<p>Grunt has <code>grunt.file.readJSON</code> and <code>grunt.file.readYAML</code> methods for importing JSON and YAML data.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  pkg: grunt.file.readJSON(<span class="hljs-string">'package.json'</span>),
+  uglify: {
+    options: {
+      banner: <span class="hljs-string">'/*! &lt;%= pkg.name %&gt; &lt;%= grunt.template.today("yyyy-mm-dd") %&gt; */\n'</span>
+    },
+    dist: {
+      src: <span class="hljs-string">'src/&lt;%= pkg.name %&gt;.js'</span>,
+      dest: <span class="hljs-string">'dist/&lt;%= pkg.name %&gt;.min.js'</span>
+    }
+  }
+});</code></pre>
+<div class="end-link">Found an error in the documentation?
+<a href='https://github.com/gruntjs/grunt-docs/issues'>File an issue</a>.</div></div></div><div class="span3"><div class="well sidebar-nav"><ul class="nav nav-list"><li class="nav-header"><i class="icon-file-text"></i><span>Documentation</span></li><li><a href="/getting-started">Getting Started</a></li><li><a class="active" href="/configuring-tasks">Configuring Tasks</a></li><li><a href="/sample-gruntfile">Sample Gruntfile</a></li><li><a href="/creating-tasks">Creating Tasks</a></li><li><a href="/creating-plugins">Creating Plugins</a></li><li><a href="/using-the-cli">Using the CLI</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Advanced</span></li><li><a href="/api">API</a></li><li><a href="/installing-grunt">Installing Grunt</a></li><li><a href="/frequently-asked-questions">Frequently Asked Questions</a></li><li><a href="/project-scaffolding">Project Scaffolding</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Community</span></li><li><a href="/help-resources">Help Resources</a></li><li><a href="/who-uses-grunt">Who uses Grunt</a></li><li><a href="/built-with-grunt-badge">Built with Grunt Badge</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Migration guides</span></li><li><a href="/upgrading-from-0.3-to-0.4">Upgrading from 0.3 to 0.4</a></li><li><a href="/upgrading-from-0.4-to-1.0">Upgrading from 0.4 to 1.0</a></li></ul><div class="advertisements"><script>var m3_u = (location.protocol=='https:'?'https://revive.bocoup.com/www/delivery/ajs.php':'http://revive.bocoup.com/www/delivery/ajs.php');var m3_r = Math.floor(Math.random()*99999999999);if (!document.MAX_used) document.MAX_used = ',';document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);document.write ("?zoneid=5");document.write ('&amp;cb=' + m3_r);if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));document.write ("&amp;loc=" + escape(window.location));if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));if (document.context) document.write ("&context=" + escape(document.context));if (document.mmm_fo) document.write ("&amp;mmm_fo=1");document.write ("'><\/scr"+"ipt>");</script><noscript><a href='http://revive.bocoup.com/www/delivery/ck.php?n=a656788f&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'><img src='http://revive.bocoup.com/www/delivery/avw.php?zoneid=5&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=a656788f' alt='' /></a></noscript><span class="adsbybocoup">Ads by <a href="http://bocoup.com">Bocoup</a>.</span></div></div></div></div></div></div><footer class="grunt-footer"><div class="inner"><div class="container"><ul class="pull-right"><li><a href="/blog">Blog</a></li><li><a href="/upgrading-from-0.3-to-0.4">Migration Guides</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li><li class="social"><a href="https://github.com/gruntjs/" title="Grunt on GitHub"><span class="icon-github"></span></a></li><li class="social"><a href="https://twitter.com/gruntjs/" title="Grunt on Twitter"><span class="icon-twitter"></span></a></li><li class="social"><a href="/rss" title="Grunt blog RSS feed"><span class="icon-rss"></span></a></li></ul></div></div></footer><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-34623937-1', 'gruntjs.com');
+ga('send', 'pageview');</script></body></html>

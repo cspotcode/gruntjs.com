@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Project Scaffolding - Grunt: The JavaScript Task Runner</title><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700"><link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon"><link href="/rss" rel="alternate" title="Grunt Blog Feed" type="application/atom+xml"></head><body class="page-docs page-secondary"><div class="navbar navbar-inverse"><div class="navbar-inner"><div class="container"><a class="brand" href="/"><span class="logo"></span></a><div class="nav-collapse collapse"><ul class="nav"><li><a href="/getting-started"><i class="icon-arrow-right"></i><span>Getting Started</span></a></li><li><a href="/configuring-tasks"><i class="icon-cog"></i><span>Configuring Tasks</span></a></li><li><a href="/plugins"><i class="icon-power-cord"></i><span>Plugins</span></a></li><li><a href="/getting-started"><i class="icon-file-text"></i><span>Documentation</span></a></li></ul><form class="navbar-search pull-right"><input class="search-query" type="text" placeholder="Search"></form></div><!--.nav-collapse--></div></div></div><div class="content"><div class="container project-scaffolding"><div class="row-fluid"><div class="span9 page"><div class="hero-unit"><h1>Project Scaffolding</h1><h2><a class="anchor" href="#grunt-init" id="grunt-init"></a>grunt-init</h2>
+<p>Grunt-init is a scaffolding tool used to automate project creation. It will build an entire directory structure based on current environment and answers to some questions. The exact files and contents created depend on the template chosen along with the answers to the questions asked.</p>
+<p><em>Note: This standalone utility used to be built-in to Grunt as the &quot;init&quot; task. See the Grunt <a href="http://gruntjs.com/upgrading-from-0.3-to-0.4">Upgrading from 0.3 to 0.4</a> guide for more information about this change.</em></p>
+<h2><a class="anchor" href="#installation" id="installation"></a>Installation</h2>
+<p>In order to use grunt-init, you&#39;ll want to install it globally.</p>
+<pre><code class="lang-shell">npm install -g grunt-init</code></pre>
+<p>This will put the <code>grunt-init</code> command in your system path, allowing it to be run from anywhere.</p>
+<p><em>Notes: You may need to use sudo or run your command shell as Administrator to do this.</em></p>
+<h2><a class="anchor" href="#usage" id="usage"></a>Usage</h2>
+<ul>
+<li>Get program help and a listing of available templates with <code>grunt-init --help</code></li>
+<li>Create a project based around an available template with <code>grunt-init TEMPLATE</code></li>
+<li>Create a project based around a arbitrarily-located template with <code>grunt-init /path/to/TEMPLATE</code></li>
+</ul>
+<p>Note that most templates generate their files in the current directory, so be sure to change to a new directory first if you don&#39;t want to overwrite existing files.</p>
+<h2><a class="anchor" href="#installing-templates" id="installing-templates"></a>Installing templates</h2>
+<p>Once templates are installed into your <code>~/.grunt-init/</code> directory (<code>%USERPROFILE%\.grunt-init\</code> on Windows) they will be available for use via grunt-init. It&#39;s recommended that you use git to clone a template into that directory. For example, the <a href="https://github.com/gruntjs/grunt-init-jquery">grunt-init-jquery</a> template can be installed like so:</p>
+<pre><code class="lang-shell">git <span class="hljs-built_in">clone</span> https://github.com/gruntjs/grunt-init-jquery.git ~/.grunt-init/jquery</code></pre>
+<p><em>Note: if you want to make the template available locally as &quot;foobarbaz&quot; you could specify <code>~/.grunt-init/foobarbaz</code> while cloning. Grunt-init will use the actual template directory name as it exists inside of the <code>~/.grunt-init/</code> directory.</em></p>
+<p>A few grunt-init templates are maintained officially:</p>
+<ul>
+<li><a href="https://github.com/gruntjs/grunt-init-commonjs">grunt-init-commonjs</a> - Create a commonjs module, including Nodeunit unit tests. (<a href="https://github.com/gruntjs/grunt-init-commonjs-sample/tree/generated">sample &quot;generated&quot; repo</a> | <a href="https://github.com/gruntjs/grunt-init-commonjs-sample#project-creation-transcript">creation transcript</a>)</li>
+<li><a href="https://github.com/gruntjs/grunt-init-gruntfile">grunt-init-gruntfile</a> - Create a basic Gruntfile. (<a href="https://github.com/gruntjs/grunt-init-gruntfile-sample/tree/generated">sample &quot;generated&quot; repo</a> | <a href="https://github.com/gruntjs/grunt-init-gruntfile-sample#project-creation-transcript">creation transcript</a>)</li>
+<li><a href="https://github.com/gruntjs/grunt-init-gruntplugin">grunt-init-gruntplugin</a> - Create a Grunt plugin, including Nodeunit unit tests. (<a href="https://github.com/gruntjs/grunt-init-gruntplugin-sample/tree/generated">sample &quot;generated&quot; repo</a> | <a href="https://github.com/gruntjs/grunt-init-gruntplugin-sample#project-creation-transcript">creation transcript</a>)</li>
+<li><a href="https://github.com/gruntjs/grunt-init-jquery">grunt-init-jquery</a> - Create a jQuery plugin, including QUnit unit tests. (<a href="https://github.com/gruntjs/grunt-init-jquery-sample/tree/generated">sample &quot;generated&quot; repo</a> | <a href="https://github.com/gruntjs/grunt-init-jquery-sample#project-creation-transcript">creation transcript</a>)</li>
+<li><a href="https://github.com/gruntjs/grunt-init-node">grunt-init-node</a> - Create a Node.js module, including Nodeunit unit tests. (<a href="https://github.com/gruntjs/grunt-init-node-sample/tree/generated">sample &quot;generated&quot; repo</a> | <a href="https://github.com/gruntjs/grunt-init-node-sample#project-creation-transcript">creation transcript</a>)</li>
+</ul>
+<h2><a class="anchor" href="#custom-templates" id="custom-templates"></a>Custom templates</h2>
+<p>You can create and use custom templates. Your template must follow the same structure as the aforementioned templates.</p>
+<p>A sample template named <code>my-template</code> would follow this general file structure:</p>
+<ul>
+<li><code>my-template/template.js</code> - the main template file.</li>
+<li><code>my-template/rename.json</code> - template-specific rename rules, processed as templates.</li>
+<li><code>my-template/root/</code> - files to be copied into the target location.</li>
+</ul>
+<p>Assuming these files exist at <code>/path/to/my-template</code>, the command <code>grunt-init /path/to/my-template</code> would be used to process the template. Multiple uniquely-named templates may exist in the same directory.</p>
+<p>Additionally, if you place this custom template in your <code>~/.grunt-init/</code> directory (<code>%USERPROFILE%\.grunt-init\</code> on Windows) it will be automatically available to be used with just <code>grunt-init my-template</code>.</p>
+<h3><a class="anchor" href="#copying-files" id="copying-files"></a>Copying files</h3>
+<p>As long as a template uses the <code>init.filesToCopy</code> and <code>init.copyAndProcess</code> methods, any files in the <code>root/</code> subdirectory will be copied to the current directory when the init template is run.</p>
+<p>Note that all copied files will be processed as templates, with any <code>{% %}</code> template being processed against the collected <code>props</code> data object, unless the <code>noProcess</code> option is set. See the <a href="https://github.com/gruntjs/grunt-init-jquery">jquery template</a> for an example.</p>
+<h3><a class="anchor" href="#renaming-or-excluding-template-files" id="renaming-or-excluding-template-files"></a>Renaming or excluding template files</h3>
+<p>The <code>rename.json</code> describes <code>sourcepath</code> to <code>destpath</code> rename mappings. The <code>sourcepath</code> must be the path of the file-to-be-copied relative to the <code>root/</code> folder, but the <code>destpath</code> value can contain <code>{% %}</code> templates, describing what the destination path will be.</p>
+<p>If <code>false</code> is specified as a <code>destpath</code> the file will not be copied. Also, glob patterns are supported for <code>srcpath</code>.</p>
+<h2><a class="anchor" href="#specifying-default-prompt-answers" id="specifying-default-prompt-answers"></a>Specifying default prompt answers</h2>
+<p>Each init prompt either has a default value hard-coded or it looks at the current environment to attempt to determine that default value. If you want to override a particular prompt&#39;s default value, you can do so in the optional OS X or Linux <code>~/.grunt-init/defaults.json</code> or Windows <code>%USERPROFILE%\.grunt-init\defaults.json</code> file.</p>
+<p>For example, my <code>defaults.json</code> file looks like this, because I want to use a slightly different name than the default name, I want to exclude my email address, and I want to specify an author URL automatically.</p>
+<pre><code class="lang-json">{
+  <span class="hljs-attr">"author_name"</span>: <span class="hljs-string">"\"Cowboy\" Ben Alman"</span>,
+  <span class="hljs-attr">"author_email"</span>: <span class="hljs-string">"none"</span>,
+  <span class="hljs-attr">"author_url"</span>: <span class="hljs-string">"http://benalman.com/"</span>
+}</code></pre>
+<p><em>Note: until all the built-in prompts have been documented, you can find their names and default values in the <a href="https://github.com/gruntjs/grunt-init/blob/master/tasks/init.js">source code</a>.</em></p>
+<h2><a class="anchor" href="#defining-an-init-template" id="defining-an-init-template"></a>Defining an init template</h2>
+<h3><a class="anchor" href="#exports.description" id="exports.description"></a>exports.description</h3>
+<p>This brief template description will be displayed along with the template name when the user runs <code>grunt init</code> or <code>grunt-init</code> to display a list of all available init templates.</p>
+<pre><code class="lang-js">exports.description = descriptionString;</code></pre>
+<h3><a class="anchor" href="#exports.notes" id="exports.notes"></a>exports.notes</h3>
+<p>If specified, this optional extended description will be displayed before any prompts are displayed. This is a good place to give the user a little help explaining naming conventions, which prompts may be required or optional, etc.</p>
+<pre><code class="lang-js">exports.notes = notesString;</code></pre>
+<h3><a class="anchor" href="#exports.warnon" id="exports.warnon"></a>exports.warnOn</h3>
+<p>If this optional (but recommended) wildcard pattern or array of wildcard patterns is matched, Grunt will abort with a warning that the user can override with <code>--force</code>. This is very useful in cases where the init template could potentially override existing files.</p>
+<pre><code class="lang-js">exports.warnOn = wildcardPattern;</code></pre>
+<p>While the most common value will be <code>&#39;*&#39;</code>, matching any file or directory, the <a href="https://github.com/isaacs/minimatch">minimatch</a> wildcard pattern syntax used allows for a lot of flexibility. For example:</p>
+<pre><code class="lang-js">exports.warnOn = <span class="hljs-string">'Gruntfile.js'</span>;        <span class="hljs-comment">// Warn on a Gruntfile.js file.</span>
+exports.warnOn = <span class="hljs-string">'*.js'</span>;            <span class="hljs-comment">// Warn on any .js file.</span>
+exports.warnOn = <span class="hljs-string">'*'</span>;               <span class="hljs-comment">// Warn on any non-dotfile or non-dotdir.</span>
+exports.warnOn = <span class="hljs-string">'.*'</span>;              <span class="hljs-comment">// Warn on any dotfile or dotdir.</span>
+exports.warnOn = <span class="hljs-string">'{.*,*}'</span>;          <span class="hljs-comment">// Warn on any file or dir (dot or non-dot).</span>
+exports.warnOn = <span class="hljs-string">'!*/**'</span>;           <span class="hljs-comment">// Warn on any file (ignoring dirs).</span>
+exports.warnOn = <span class="hljs-string">'*.{png,gif,jpg}'</span>; <span class="hljs-comment">// Warn on any image file.</span>
+
+<span class="hljs-comment">// This is another way of writing the last example.</span>
+exports.warnOn = [<span class="hljs-string">'*.png'</span>, <span class="hljs-string">'*.gif'</span>, <span class="hljs-string">'*.jpg'</span>];</code></pre>
+<h3><a class="anchor" href="#exports.template" id="exports.template"></a>exports.template</h3>
+<p>While the <code>exports</code> properties are defined outside this function, all the actual init code is specified inside. Three arguments are passed into this function. The <code>grunt</code> argument is a reference to grunt, containing all the <a href="/api/grunt">grunt methods and libs</a>. The <code>init</code> argument is an object containing methods and properties specific to this init template. The <code>done</code> argument is a function that must be called when the init template is done executing.</p>
+<pre><code class="lang-js">exports.template = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">grunt, init, done</span>) </span>{
+  <span class="hljs-comment">// See the "Inside an init template" section.</span>
+};</code></pre>
+<h2><a class="anchor" href="#inside-an-init-template" id="inside-an-init-template"></a>Inside an init template</h2>
+<h3><a class="anchor" href="#init.addlicensefiles" id="init.addlicensefiles"></a>init.addLicenseFiles</h3>
+<p>Add properly-named license files to the files object.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> files = {};
+<span class="hljs-keyword">var</span> licenses = [<span class="hljs-string">'MIT'</span>];
+init.addLicenseFiles(files, licenses);
+<span class="hljs-comment">// files === {'LICENSE-MIT': 'licenses/LICENSE-MIT'}</span></code></pre>
+<h3><a class="anchor" href="#init.availablelicenses" id="init.availablelicenses"></a>init.availableLicenses</h3>
+<p>Return an array of available licenses.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> licenses = init.availableLicenses();
+<span class="hljs-comment">// licenses === [ 'Apache-2.0', 'GPL-2.0', 'MIT', 'MPL-2.0' ]</span></code></pre>
+<h3><a class="anchor" href="#init.copy" id="init.copy"></a>init.copy</h3>
+<p>Given an absolute or relative source path, and an optional relative
+destination path, copy a file, optionally processing it through the
+passed callback.</p>
+<pre><code class="lang-js">init.copy(srcpath[, destpath], options)</code></pre>
+<h3><a class="anchor" href="#init.copyandprocess" id="init.copyandprocess"></a>init.copyAndProcess</h3>
+<p>Iterate over all files in the passed object, copying the source file to
+the destination, processing the contents.</p>
+<pre><code class="lang-js">init.copyAndProcess(files, props[, options])</code></pre>
+<h3><a class="anchor" href="#init.defaults" id="init.defaults"></a>init.defaults</h3>
+<p>User-specified default init values from <code>defaults.json</code>.</p>
+<pre><code class="lang-js">init.defaults</code></pre>
+<h3><a class="anchor" href="#init.destpath" id="init.destpath"></a>init.destpath</h3>
+<p>Absolute destination file path.</p>
+<pre><code class="lang-js">init.destpath()</code></pre>
+<h3><a class="anchor" href="#init.expand" id="init.expand"></a>init.expand</h3>
+<p>Same as <a href="https://github.com/gruntjs/grunt/wiki/grunt.file#wiki-grunt-file-expand">grunt.file.expand</a>.</p>
+<p>Return a unique array of all file or directory paths that match the given wildcard pattern(s). This method accepts either comma separated wildcard patterns or an array of wildcard patterns. Paths matching patterns that begin with ! will be excluded from the returned array. Patterns are processed in order, so inclusion and exclusion order is significant.</p>
+<pre><code class="lang-js">init.expand([options, ] patterns)</code></pre>
+<h3><a class="anchor" href="#init.filestocopy" id="init.filestocopy"></a>init.filesToCopy</h3>
+<p>Return an object containing files to copy with their absolute source path and relative destination path, renamed (or omitted) according to rules in rename.json (if it exists).</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> files = init.filesToCopy(props);
+<span class="hljs-comment">/* files === { '.gitignore': 'template/root/.gitignore',
+  '.jshintrc': 'template/root/.jshintrc',
+  'Gruntfile.js': 'template/root/Gruntfile.js',
+  'README.md': 'template/root/README.md',
+  'test/test_test.js': 'template/root/test/name_test.js' } */</span></code></pre>
+<h3><a class="anchor" href="#init.getfile" id="init.getfile"></a>init.getFile</h3>
+<p>Get a single task file path.</p>
+<pre><code class="lang-js">init.getFile(filepath[, ...])</code></pre>
+<h3><a class="anchor" href="#init.gettemplates" id="init.gettemplates"></a>init.getTemplates</h3>
+<p>Returns an object of all the available templates.</p>
+<pre><code class="lang-js">init.getTemplates()</code></pre>
+<h3><a class="anchor" href="#init.initsearchdirs" id="init.initsearchdirs"></a>init.initSearchDirs</h3>
+<p>Initialize the directories to search for init templates. <code>template</code> is the
+location of a template. Will also include <code>~/.grunt-init/</code> and the core init
+tasks within grunt-init.</p>
+<pre><code class="lang-js">init.initSearchDirs([filename])</code></pre>
+<h3><a class="anchor" href="#init.process" id="init.process"></a>init.process</h3>
+<p>Start up the process to begin prompting for input.</p>
+<pre><code class="lang-js">init.process(options, prompts, done)</code></pre>
+<pre><code class="lang-js">init.process({}, [
+  <span class="hljs-comment">// Prompt for these values</span>
+  init.prompt(<span class="hljs-string">'name'</span>),
+  init.prompt(<span class="hljs-string">'description'</span>),
+  init.prompt(<span class="hljs-string">'version'</span>)
+], <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">err, props</span>) </span>{
+  <span class="hljs-comment">// All finished, do something with the properties</span>
+});</code></pre>
+<h3><a class="anchor" href="#init.prompt" id="init.prompt"></a>init.prompt</h3>
+<p>Prompt a user for a value.</p>
+<pre><code class="lang-js">init.prompt(name[, <span class="hljs-keyword">default</span>])</code></pre>
+<h3><a class="anchor" href="#init.prompts" id="init.prompts"></a>init.prompts</h3>
+<p>An object of all the prompts.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> prompts = init.prompts;</code></pre>
+<h3><a class="anchor" href="#init.readdefaults" id="init.readdefaults"></a>init.readDefaults</h3>
+<p>Read JSON defaults from task files (if they exist), merging them into one data object.</p>
+<pre><code class="lang-js">init.readDefaults(filepath[, ...])</code></pre>
+<h3><a class="anchor" href="#init.renames" id="init.renames"></a>init.renames</h3>
+<p>The rename rules for the template.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> renames = init.renames;
+<span class="hljs-comment">// renames === { 'test/name_test.js': 'test/{%= name %}_test.js' }</span></code></pre>
+<h3><a class="anchor" href="#init.searchdirs" id="init.searchdirs"></a>init.searchDirs</h3>
+<p>An array of directories to search for templates in.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> dirs = init.searchDirs;
+<span class="hljs-comment">/* dirs === [ '/Users/shama/.grunt-init',
+  '/usr/local/lib/node_modules/grunt-init/templates' ] */</span></code></pre>
+<h3><a class="anchor" href="#init.srcpath" id="init.srcpath"></a>init.srcpath</h3>
+<p>Search init template paths for filename and return an absolute path.</p>
+<pre><code class="lang-js">init.srcpath(filepath[, ...])</code></pre>
+<h3><a class="anchor" href="#init.userdir" id="init.userdir"></a>init.userDir</h3>
+<p>Returns the absolute path to the user&#39;s template directory.</p>
+<pre><code class="lang-js"><span class="hljs-keyword">var</span> dir = init.userDir();
+<span class="hljs-comment">// dir === '/Users/shama/.grunt-init'</span></code></pre>
+<h3><a class="anchor" href="#init.writepackagejson" id="init.writepackagejson"></a>init.writePackageJSON</h3>
+<p>Save a package.json file in the destination directory. The callback can be used to post-process properties to add/remove/whatever.</p>
+<pre><code class="lang-js">init.writePackageJSON(filename, props[, callback])</code></pre>
+<h2><a class="anchor" href="#built-in-prompts" id="built-in-prompts"></a>Built-in prompts</h2>
+<h3><a class="anchor" href="#author_email" id="author_email"></a>author_email</h3>
+<p>Author&#39;s email address to use in the <code>package.json</code>. Will attempt to find a default value from the user&#39;s git config.</p>
+<h3><a class="anchor" href="#author_name" id="author_name"></a>author_name</h3>
+<p>Author&#39;s full name to use in the <code>package.json</code> and copyright notices. Will attempt to find a default value from the user&#39;s git config.</p>
+<h3><a class="anchor" href="#author_url" id="author_url"></a>author_url</h3>
+<p>A public URL to the author&#39;s website to use in the <code>package.json</code>.</p>
+<h3><a class="anchor" href="#bin" id="bin"></a>bin</h3>
+<p>A relative path from the project root for a cli script.</p>
+<h3><a class="anchor" href="#bugs" id="bugs"></a>bugs</h3>
+<p>A public URL to the project&#39;s issues tracker. Will default to the GitHub issue tracker if the project has a GitHub repository.</p>
+<h3><a class="anchor" href="#description" id="description"></a>description</h3>
+<p>A description of the project. Used in the <code>package.json</code> and README files.</p>
+<h3><a class="anchor" href="#grunt_version" id="grunt_version"></a>grunt_version</h3>
+<p>A valid semantic version range descriptor of Grunt the project requires.</p>
+<h3><a class="anchor" href="#homepage" id="homepage"></a>homepage</h3>
+<p>A public URL to the project&#39;s home page. Will default to the GitHub URL if a GitHub repository.</p>
+<h3><a class="anchor" href="#jquery_version" id="jquery_version"></a>jquery_version</h3>
+<p>If a jQuery project, the version of jQuery the project requires. Must be a valid semantic version range descriptor.</p>
+<h3><a class="anchor" href="#licenses" id="licenses"></a>licenses</h3>
+<p>The license(s) for the project. Multiple licenses are separated by spaces. The licenses built-in are: <code>MIT</code>, <code>MPL-2.0</code>, <code>GPL-2.0</code>, and <code>Apache-2.0</code>. Defaults to <code>MIT</code>. Add custom licenses with <a href="/project-scaffolding#init.addlicensefiles">init.addLicenseFiles</a>.</p>
+<h3><a class="anchor" href="#main" id="main"></a>main</h3>
+<p>The primary entry point of the project. Defaults to the project name within the <code>lib</code> folder.</p>
+<h3><a class="anchor" href="#name" id="name"></a>name</h3>
+<p>The name of the project. Will be used heavily throughout the project template. Defaults to the current working directory.</p>
+<h3><a class="anchor" href="#node_version" id="node_version"></a>node_version</h3>
+<p>The version of Node.js the project requires. Must be a valid semantic version range descriptor.</p>
+<h3><a class="anchor" href="#npm_test" id="npm_test"></a>npm_test</h3>
+<p>The command to run tests on your project. Defaults to <code>grunt</code>.</p>
+<h3><a class="anchor" href="#repository" id="repository"></a>repository</h3>
+<p>Project&#39;s git repository. Defaults to a guess of a GitHub URL.</p>
+<h3><a class="anchor" href="#title" id="title"></a>title</h3>
+<p>A human readable project name. Defaults to the actual project name altered to be more human readable.</p>
+<h3><a class="anchor" href="#version" id="version"></a>version</h3>
+<p>The version of the project. Defaults to the first valid semantic version, <code>0.1.0</code>.</p>
+<div class="end-link">Found an error in the documentation?
+<a href='https://github.com/gruntjs/grunt-docs/issues'>File an issue</a>.</div></div></div><div class="span3"><div class="well sidebar-nav"><ul class="nav nav-list"><li class="nav-header"><i class="icon-file-text"></i><span>Documentation</span></li><li><a href="/getting-started">Getting Started</a></li><li><a href="/configuring-tasks">Configuring Tasks</a></li><li><a href="/sample-gruntfile">Sample Gruntfile</a></li><li><a href="/creating-tasks">Creating Tasks</a></li><li><a href="/creating-plugins">Creating Plugins</a></li><li><a href="/using-the-cli">Using the CLI</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Advanced</span></li><li><a href="/api">API</a></li><li><a href="/installing-grunt">Installing Grunt</a></li><li><a href="/frequently-asked-questions">Frequently Asked Questions</a></li><li><a class="active" href="/project-scaffolding">Project Scaffolding</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Community</span></li><li><a href="/help-resources">Help Resources</a></li><li><a href="/who-uses-grunt">Who uses Grunt</a></li><li><a href="/built-with-grunt-badge">Built with Grunt Badge</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Migration guides</span></li><li><a href="/upgrading-from-0.3-to-0.4">Upgrading from 0.3 to 0.4</a></li><li><a href="/upgrading-from-0.4-to-1.0">Upgrading from 0.4 to 1.0</a></li></ul><div class="advertisements"><script>var m3_u = (location.protocol=='https:'?'https://revive.bocoup.com/www/delivery/ajs.php':'http://revive.bocoup.com/www/delivery/ajs.php');var m3_r = Math.floor(Math.random()*99999999999);if (!document.MAX_used) document.MAX_used = ',';document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);document.write ("?zoneid=5");document.write ('&amp;cb=' + m3_r);if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));document.write ("&amp;loc=" + escape(window.location));if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));if (document.context) document.write ("&context=" + escape(document.context));if (document.mmm_fo) document.write ("&amp;mmm_fo=1");document.write ("'><\/scr"+"ipt>");</script><noscript><a href='http://revive.bocoup.com/www/delivery/ck.php?n=a656788f&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'><img src='http://revive.bocoup.com/www/delivery/avw.php?zoneid=5&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=a656788f' alt='' /></a></noscript><span class="adsbybocoup">Ads by <a href="http://bocoup.com">Bocoup</a>.</span></div></div></div></div></div></div><footer class="grunt-footer"><div class="inner"><div class="container"><ul class="pull-right"><li><a href="/blog">Blog</a></li><li><a href="/upgrading-from-0.3-to-0.4">Migration Guides</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li><li class="social"><a href="https://github.com/gruntjs/" title="Grunt on GitHub"><span class="icon-github"></span></a></li><li class="social"><a href="https://twitter.com/gruntjs/" title="Grunt on Twitter"><span class="icon-twitter"></span></a></li><li class="social"><a href="/rss" title="Grunt blog RSS feed"><span class="icon-rss"></span></a></li></ul></div></div></footer><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-34623937-1', 'gruntjs.com');
+ga('send', 'pageview');</script></body></html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><title>grunt.task - Grunt: The JavaScript Task Runner</title><link rel="stylesheet" href="/css/main.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700"><link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon"><link href="/rss" rel="alternate" title="Grunt Blog Feed" type="application/atom+xml"></head><body class="page-api page-secondary"><div class="navbar navbar-inverse"><div class="navbar-inner"><div class="container"><a class="brand" href="/"><span class="logo"></span></a><div class="nav-collapse collapse"><ul class="nav"><li><a href="/getting-started"><i class="icon-arrow-right"></i><span>Getting Started</span></a></li><li><a href="/configuring-tasks"><i class="icon-cog"></i><span>Configuring Tasks</span></a></li><li><a href="/plugins"><i class="icon-power-cord"></i><span>Plugins</span></a></li><li><a href="/getting-started"><i class="icon-file-text"></i><span>Documentation</span></a></li></ul><form class="navbar-search pull-right"><input class="search-query" type="text" placeholder="Search"></form></div><!--.nav-collapse--></div></div></div><div class="content"><div class="container grunt.task"><div class="row-fluid"><div class="span9 page"><div class="hero-unit"><h1>grunt.task</h1><p>Register, run and load external tasks.</p>
+<p>See the <a href="https://github.com/gruntjs/grunt/blob/master/lib/grunt/task.js">task lib source</a> and <a href="https://github.com/gruntjs/grunt/blob/master/lib/util/task.js">task util lib source</a> for more information.</p>
+<h2><a class="anchor" href="#the-task-api" id="the-task-api"></a>The task API</h2>
+<p>While a task is running, Grunt exposes many task-specific utility properties and methods inside the task function via the <code>this</code> object. See the <a href="/inside-tasks/">Inside tasks</a> guide for a list of these properties and methods.</p>
+<p>Many utility properties and methods are available inside of tasks via the <code>this</code> object.</p>
+<p>Note that any method marked with a ☃ (unicode snowman) is also available directly on the <code>grunt</code> object. Just so you know. See the <a href="/grunt">API main page</a> for more usage information.</p>
+<h2><a class="anchor" href="#creating-tasks" id="creating-tasks"></a>Creating Tasks</h2>
+<h3><a class="anchor" href="#grunt.task.registertask" id="grunt.task.registertask"></a>grunt.task.registerTask ☃</h3>
+<p>Register an &quot;alias task&quot; or a task function. This method supports the following two signatures:</p>
+<p><strong>Alias task</strong></p>
+<p>If a task list is specified, the new task will be an alias for one or more other tasks. Whenever this &quot;alias task&quot; is run, every specified task in <code>taskList</code> will be run, in the order specified. The <code>taskList</code> argument must be an array of tasks.</p>
+<pre><code class="lang-js">grunt.task.registerTask(taskName, taskList)</code></pre>
+<p>When the optional <code>description</code> string is passed it will be displayed when <code>grunt --help</code> is run:</p>
+<pre><code class="lang-js">grunt.task.registerTask(taskName, description, taskList)</code></pre>
+<p>This example alias task defines a &quot;default&quot; task whereby the &quot;jshint&quot;, &quot;qunit&quot;, &quot;concat&quot; and &quot;uglify&quot; tasks are run automatically if Grunt is executed without any tasks specified:</p>
+<pre><code class="lang-js">task.registerTask(<span class="hljs-string">'default'</span>, [<span class="hljs-string">'jshint'</span>, <span class="hljs-string">'qunit'</span>, <span class="hljs-string">'concat'</span>, <span class="hljs-string">'uglify'</span>]);</code></pre>
+<p>Task arguments can be specified as well. In this example, the alias &quot;dist&quot; runs both the &quot;concat&quot; and &quot;uglify&quot; tasks, each with the &quot;dist&quot; argument:</p>
+<pre><code class="lang-js">task.registerTask(<span class="hljs-string">'dist'</span>, [<span class="hljs-string">'concat:dist'</span>, <span class="hljs-string">'uglify:dist'</span>]);</code></pre>
+<p><strong>Function task</strong></p>
+<p>If a <code>description</code> and <code>taskFunction</code> are passed, the specified function will be executed whenever the task is run. In addition, the specified description will be shown when <code>grunt --help</code> is run. Task-specific properties and methods are available inside the task function as properties of the <code>this</code> object. The task function can return <code>false</code> to indicate that the task has failed.</p>
+<p>Note that the <code>grunt.task.registerMultiTask</code> method, explained below, can be used to define a special type of task known as a &quot;multi task.&quot;</p>
+<pre><code class="lang-js">grunt.task.registerTask(taskName, description, taskFunction)</code></pre>
+<p>This example task logs <code>foo, testing 123</code> if Grunt is run via <code>grunt foo:testing:123</code>. If the task is run without arguments as <code>grunt foo</code> the task logs <code>foo, no args</code>.</p>
+<pre><code class="lang-js">grunt.task.registerTask(<span class="hljs-string">'foo'</span>, <span class="hljs-string">'A sample task that logs stuff.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">arg1, arg2</span>) </span>{
+  <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length === <span class="hljs-number">0</span>) {
+    grunt.log.writeln(<span class="hljs-keyword">this</span>.name + <span class="hljs-string">", no args"</span>);
+  } <span class="hljs-keyword">else</span> {
+    grunt.log.writeln(<span class="hljs-keyword">this</span>.name + <span class="hljs-string">", "</span> + arg1 + <span class="hljs-string">" "</span> + arg2);
+  }
+});</code></pre>
+<p>See the <a href="/creating-tasks">creating tasks</a> documentation for more examples of tasks and alias tasks.</p>
+<p><em>This method is also available as <a href="/grunt">grunt.registerTask</a>.</em></p>
+<h3><a class="anchor" href="#grunt.task.registermultitask" id="grunt.task.registermultitask"></a>grunt.task.registerMultiTask ☃</h3>
+<p>Register a &quot;multi task.&quot; A multi task is a task that implicitly iterates over all of its named sub-properties (AKA targets) if no target was specified. In addition to the default properties and methods, extra multi task-specific properties are available inside the task function as properties of the <code>this</code> object.</p>
+<p>Many of the contrib tasks, including the <a href="https://github.com/gruntjs/grunt-contrib-jshint">jshint task</a>, <a href="https://github.com/gruntjs/grunt-contrib-concat">concat task</a> and <a href="https://github.com/gruntjs/grunt-contrib-uglify">uglify task</a> are multi tasks.</p>
+<pre><code class="lang-js">grunt.task.registerMultiTask(taskName, description, taskFunction)</code></pre>
+<p>Given the specified configuration, this example multi task would log <code>foo: 1,2,3</code> if Grunt was run via <code>grunt log:foo</code>, or it would log <code>bar: hello world</code> if Grunt was run via <code>grunt log:bar</code>. If Grunt was run as <code>grunt log</code> however, it would log <code>foo: 1,2,3</code> then <code>bar: hello world</code> then <code>baz: false</code>.</p>
+<pre><code class="lang-js">grunt.initConfig({
+  log: {
+    foo: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>],
+    bar: <span class="hljs-string">'hello world'</span>,
+    baz: <span class="hljs-literal">false</span>
+  }
+});
+
+grunt.task.registerMultiTask(<span class="hljs-string">'log'</span>, <span class="hljs-string">'Log stuff.'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+  grunt.log.writeln(<span class="hljs-keyword">this</span>.target + <span class="hljs-string">': '</span> + <span class="hljs-keyword">this</span>.data);
+});</code></pre>
+<p>See the <a href="/creating-tasks">creating tasks</a> documentation for more examples of multi tasks.</p>
+<p><em>This method is also available as <a href="/grunt">grunt.registerMultiTask</a>.</em></p>
+<h3><a class="anchor" href="#grunt.task.requires" id="grunt.task.requires"></a>grunt.task.requires</h3>
+<p>Fail the task if some other task failed or never ran.</p>
+<pre><code class="lang-js">grunt.task.requires(taskName);</code></pre>
+<h3><a class="anchor" href="#grunt.task.exists" id="grunt.task.exists"></a>grunt.task.exists</h3>
+<p><em>Added in 0.4.5</em></p>
+<p>Check with the name, if a task exists in the registered tasks. Return a boolean.</p>
+<pre><code class="lang-js">grunt.task.exists(name)</code></pre>
+<h3><a class="anchor" href="#grunt.task.renametask" id="grunt.task.renametask"></a>grunt.task.renameTask ☃</h3>
+<p>Rename a task. This might be useful if you want to override the default behavior of a task, while retaining the old name.</p>
+<p><em>Note that if a task has been renamed, the <a href="/inside-tasks#this.name">this.name</a> and <a href="/inside-tasks#this.nameargs">this.nameArgs</a> properties will change accordingly.</em></p>
+<pre><code class="lang-js">grunt.task.renameTask(oldname, newname)</code></pre>
+<p><em>This method is also available as <a href="/grunt">grunt.renameTask</a>.</em></p>
+<h2><a class="anchor" href="#loading-externally-defined-tasks" id="loading-externally-defined-tasks"></a>Loading Externally-Defined Tasks</h2>
+<p>For most projects, tasks will be defined in the <a href="/getting-started">Gruntfile</a>. For larger projects, or in cases where tasks need to be shared across projects, tasks can be loaded from one or more external directories or Npm-installed Grunt plugins.</p>
+<h3><a class="anchor" href="#grunt.task.loadtasks" id="grunt.task.loadtasks"></a>grunt.task.loadTasks ☃</h3>
+<p>Load task-related files from the specified directory, relative to the <a href="/getting-started">Gruntfile</a>. This method can be used to load task-related files from a local Grunt plugin by specifying the path to that plugin&#39;s &quot;tasks&quot; subdirectory.</p>
+<pre><code class="lang-js">grunt.task.loadTasks(tasksPath)</code></pre>
+<p><em>This method is also available as <a href="/grunt">grunt.loadTasks</a>.</em></p>
+<h3><a class="anchor" href="#grunt.task.loadnpmtasks" id="grunt.task.loadnpmtasks"></a>grunt.task.loadNpmTasks ☃</h3>
+<p>Load tasks from the specified Grunt plugin. This plugin must be installed locally via npm, and must be relative to the <a href="/getting-started">Gruntfile</a>. Grunt plugins can be created by using the <a href="https://github.com/gruntjs/grunt-init">grunt-init gruntplugin template</a>: <code>grunt init:gruntplugin</code>.</p>
+<pre><code class="lang-js">grunt.task.loadNpmTasks(pluginName)</code></pre>
+<p><em>This method is also available as <a href="/grunt">grunt.loadNpmTasks</a>.</em></p>
+<h2><a class="anchor" href="#queueing-tasks" id="queueing-tasks"></a>Queueing Tasks</h2>
+<p>Grunt automatically enqueues and runs all tasks specified on the command line, but individual tasks can enqueue additional tasks to be run.</p>
+<h3><a class="anchor" href="#grunt.task.run" id="grunt.task.run"></a>grunt.task.run</h3>
+<p>Enqueue one or more tasks. Every specified task in <code>taskList</code> will be run immediately after the current task completes, in the order specified. The task list can be an array of tasks or individual task arguments.</p>
+<pre><code class="lang-js">grunt.task.run(taskList)</code></pre>
+<h3><a class="anchor" href="#grunt.task.clearqueue" id="grunt.task.clearqueue"></a>grunt.task.clearQueue</h3>
+<p>Empty the task queue completely. Unless additional tasks are enqueued, no more tasks will be run.</p>
+<pre><code class="lang-js">grunt.task.clearQueue()</code></pre>
+<h3><a class="anchor" href="#grunt.task.normalizemultitaskfiles" id="grunt.task.normalizemultitaskfiles"></a>grunt.task.normalizeMultiTaskFiles</h3>
+<p>Normalizes a task target configuration object into an array of src-dest file mappings. This method is used internally by the multi task system <a href="/grunt.task#wiki-this-files">this.files / grunt.task.current.files</a> property.</p>
+<pre><code class="lang-js">grunt.task.normalizeMultiTaskFiles(data [, targetname])</code></pre>
+<div class="end-link">Found an error in the documentation?
+<a href='https://github.com/gruntjs/grunt-docs/issues'>File an issue</a>.</div></div></div><div class="span3"><div class="well sidebar-nav"><ul class="nav nav-list"><li class="nav-header"><i class="icon-cog"></i><span>API</span></li><li><a href="/api/grunt">grunt</a></li><li><a href="/api/grunt.config">grunt.config</a></li><li><a href="/api/grunt.event">grunt.event</a></li><li><a href="/api/grunt.fail">grunt.fail</a></li><li><a href="/api/grunt.file">grunt.file</a></li><li><a href="/api/grunt.log">grunt.log</a></li><li><a href="/api/grunt.option">grunt.option</a></li><li><a class="active" href="/api/grunt.task">grunt.task</a></li><li><a href="/api/grunt.template">grunt.template</a></li><li><a href="/api/grunt.util">grunt.util</a></li></ul><ul class="nav nav-list"><li class="nav-header"><span>Other</span></li><li><a href="/api/inside-tasks">Inside Tasks</a></li><li><a href="/api/exit-codes">Exit Codes</a></li></ul><div class="advertisements"><script>var m3_u = (location.protocol=='https:'?'https://revive.bocoup.com/www/delivery/ajs.php':'http://revive.bocoup.com/www/delivery/ajs.php');var m3_r = Math.floor(Math.random()*99999999999);if (!document.MAX_used) document.MAX_used = ',';document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);document.write ("?zoneid=5");document.write ('&amp;cb=' + m3_r);if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);document.write (document.charset ? '&amp;charset='+document.charset : (document.characterSet ? '&amp;charset='+document.characterSet : ''));document.write ("&amp;loc=" + escape(window.location));if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));if (document.context) document.write ("&context=" + escape(document.context));if (document.mmm_fo) document.write ("&amp;mmm_fo=1");document.write ("'><\/scr"+"ipt>");</script><noscript><a href='http://revive.bocoup.com/www/delivery/ck.php?n=a656788f&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'><img src='http://revive.bocoup.com/www/delivery/avw.php?zoneid=5&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=a656788f' alt='' /></a></noscript><span class="adsbybocoup">Ads by <a href="http://bocoup.com">Bocoup</a>.</span></div></div></div></div></div></div><footer class="grunt-footer"><div class="inner"><div class="container"><ul class="pull-right"><li><a href="/blog">Blog</a></li><li><a href="/upgrading-from-0.3-to-0.4">Migration Guides</a></li><li><a href="/contributing">Contributing</a></li><li><a href="/development-team">Development Team</a></li><li class="social"><a href="https://github.com/gruntjs/" title="Grunt on GitHub"><span class="icon-github"></span></a></li><li class="social"><a href="https://twitter.com/gruntjs/" title="Grunt on Twitter"><span class="icon-twitter"></span></a></li><li class="social"><a href="/rss" title="Grunt blog RSS feed"><span class="icon-rss"></span></a></li></ul></div></div></footer><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-34623937-1', 'gruntjs.com');
+ga('send', 'pageview');</script></body></html>
