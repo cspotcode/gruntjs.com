@@ -1,2 +1,4 @@
+baseurl: "gruntjs.com"
+
 gems:
   - jekyll-redirect-from
